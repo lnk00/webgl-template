@@ -14,12 +14,14 @@ export class AssetLoader extends EventTarget {
     super();
     this.loadingManager = new THREE.LoadingManager(
       () => {
+        console.log(`Loaded: ${this.loaded}/${this.total}`);
         this.dispatchEvent(new Event('loaded'));
       },
       (_url, loaded, total) => {
         this.loaded = loaded;
         this.total = total;
-        this.dispatchEvent(new Event('progress'));
+        console.log(`Loading... ${this.loaded}/${this.total}`);
+        this.dispatchEvent(new Event('loading'));
       },
       (url) => {console.log('Error loading: ', url)}
     );

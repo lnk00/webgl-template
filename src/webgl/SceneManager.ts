@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { AssetLoader } from "./AssetLoader";
 import { Pane } from 'tweakpane';
+import {Asset} from "./AsssetManager";
 
 export class SceneManager {
   assetLoader: AssetLoader
@@ -14,9 +15,10 @@ export class SceneManager {
   width: number;
   height: number;
 
-  objects: THREE.Object3D[] = [];
+  meshes: THREE.Mesh[] = [];
 
   updateObjectCallback: Function = () => {};
+  onLoaded: Function = () => {};
 
   constructor(canvas: HTMLCanvasElement, assetLoader: AssetLoader, width: number, height: number) {
     this.width = width;
@@ -71,8 +73,31 @@ export class SceneManager {
     });
   }
 
-  loadAssets(urls: string[]): void {
-    console.log(urls[0].endsWith('.gltf'));
+  loadAssets(assets: Asset[]): void {
+    assets.forEach(asset => {
+      if (asset.type === 'Mesh' && asset.url.endsWith('.gltf')) {
+        this.assetLoader.gltfLoader.load(asset.url, gltf => {
+          gltf.scene.children.forEach(child => {
+            if (child.type === 'Mesh') {
+              child.name = asset.name;
+              this.meshes.push(child as THREE.Mesh);
+            }
+          })
+        });
+      }
+    });
+  }
+
+  onAssetsLoaded(listener: EventListenerOrEventListenerObject): void {
+    this.assetLoader.addEventListener('loaded', listener);
+  }
+
+  onAssetsLoading(listener: EventListenerOrEventListenerObject): void {
+    this.assetLoader.addEventListener('loading', listener);
+  }
+
+  getMeshByName(name: string): THREE.Mesh | undefined {
+    return this.meshes.find(mesh => mesh.name === name)
   }
 
   render(): void {
