@@ -3,8 +3,6 @@ import * as THREE from 'three';
 import { SceneManager } from './webgl/SceneManager';
 import { AssetLoader } from './webgl/AssetLoader';
 import { AssetsRepository } from './webgl/AsssetManager';
-import BasicVertexShader from './shaders/basic.vertex.glsl?raw';
-import BasicFragmentShader from './shaders/basic.fragment.glsl?raw';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const canvas = document.querySelector('.webgl')! as HTMLCanvasElement;
@@ -18,21 +16,31 @@ function onLoading() {
 }
 
 function onLoaded() {
-  const suzanne = sceneManager.getMeshByName('Suzanne');
-  if (suzanne) {
-    suzanne.material = new THREE.RawShaderMaterial({
-      vertexShader: BasicVertexShader,
-      fragmentShader: BasicFragmentShader,
-      wireframe: true,
-    });
-    sceneManager.scene.add(suzanne);
+  const pointLight = new THREE.PointLight('white', 3);
+  pointLight.position.set(2, 2, 2);
+  sceneManager.scene.add(pointLight);
 
-    const suzanneFolder = sceneManager.gui.addFolder({
-      title: 'Suzanne',
-    });
+  const cubeMesh = new THREE.Mesh(
+    new THREE.BoxBufferGeometry(1, 1, 1),
+    new THREE.MeshStandardMaterial({
+      map: sceneManager.getTextureByName('GoldAlbedo'),
+      roughnessMap: sceneManager.getTextureByName('GoldRoughness'),
+      metalnessMap: sceneManager.getTextureByName('GoldMetallic'),
+      aoMap: sceneManager.getTextureByName('GoldAO'),
+      normalMap: sceneManager.getTextureByName('GoldNormal'),
+      envMap: sceneManager.getEnvTextureByName('EnvMap'),
+      toneMapped: true,
+      envMapIntensity: 1,
+      metalness: 1,
+      roughness: 0.7,
+      aoMapIntensity: 0.75,
+    })
+  );
+  cubeMesh.geometry.setAttribute('uv2', new THREE.BufferAttribute(cubeMesh.geometry.attributes.uv.array, 2));
+  sceneManager.scene.add(cubeMesh);
 
-    suzanneFolder.addInput(suzanne.rotation, 'x', { min: 0, max: 10, step: 0.001, label: 'rotationX' });
-    suzanneFolder.addInput(suzanne.rotation, 'y', { min: 0, max: 10, step: 0.001, label: 'rotationY' });
-    suzanneFolder.addInput(suzanne.rotation, 'z', { min: 0, max: 10, step: 0.001, label: 'rotationZ' });
-  }
+  sceneManager.updateObjectCallback = () => {
+    cubeMesh.rotation.y = sceneManager.elapsedTime * 0.2;
+    cubeMesh.rotation.z = sceneManager.elapsedTime * 0.5;
+  };
 }
