@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { AssetLoader } from "./AssetLoader";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { AssetLoader } from './AssetLoader';
 import { Pane } from 'tweakpane';
-import {Asset} from "./AsssetManager";
+import { Asset } from './AsssetManager';
 
 export class SceneManager {
-  assetLoader: AssetLoader
+  assetLoader: AssetLoader;
   scene: THREE.Scene;
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
@@ -17,8 +17,9 @@ export class SceneManager {
 
   meshes: THREE.Mesh[] = [];
 
-  updateObjectCallback: Function = () => {};
-  onLoaded: Function = () => {};
+  updateObjectCallback = (): void => {
+    return;
+  };
 
   constructor(canvas: HTMLCanvasElement, assetLoader: AssetLoader, width: number, height: number) {
     this.width = width;
@@ -74,15 +75,15 @@ export class SceneManager {
   }
 
   loadAssets(assets: Asset[]): void {
-    assets.forEach(asset => {
+    assets.forEach((asset) => {
       if (asset.type === 'Mesh' && asset.url.endsWith('.gltf')) {
-        this.assetLoader.gltfLoader.load(asset.url, gltf => {
-          gltf.scene.children.forEach(child => {
+        this.assetLoader.gltfLoader.load(asset.url, (gltf) => {
+          gltf.scene.children.forEach((child) => {
             if (child.type === 'Mesh') {
               child.name = asset.name;
               this.meshes.push(child as THREE.Mesh);
             }
-          })
+          });
         });
       }
     });
@@ -97,7 +98,7 @@ export class SceneManager {
   }
 
   getMeshByName(name: string): THREE.Mesh | undefined {
-    return this.meshes.find(mesh => mesh.name === name)
+    return this.meshes.find((mesh) => mesh.name === name);
   }
 
   render(): void {
