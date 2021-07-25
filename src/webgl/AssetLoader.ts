@@ -1,18 +1,30 @@
 import * as THREE from 'three';
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-export class AssetLoader {
+export class AssetLoader extends EventTarget {
   loadingManager: THREE.LoadingManager;
   gltfLoader: GLTFLoader;
   textureLoader: THREE.TextureLoader;
+  envTextureLoader: THREE.CubeTextureLoader;
+
+  loaded: number = 0;
+  total: number = 0;
 
   constructor() {
+    super();
     this.loadingManager = new THREE.LoadingManager(
-      () => { console.log('Loading ended.') },
-      (_url, loaded, total) => { console.log(`Loading... : ${loaded}/${total}`, ) },
+      () => {
+        this.dispatchEvent(new Event('loaded'));
+      },
+      (_url, loaded, total) => {
+        this.loaded = loaded;
+        this.total = total;
+        this.dispatchEvent(new Event('progress'));
+      },
       (url) => {console.log('Error loading: ', url)}
     );
     this.gltfLoader = new GLTFLoader(this.loadingManager);
     this.textureLoader = new THREE.TextureLoader(this.loadingManager);
+    this.envTextureLoader = new THREE.CubeTextureLoader(this.loadingManager);
   }
 }

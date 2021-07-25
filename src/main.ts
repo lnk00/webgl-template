@@ -5,9 +5,25 @@ import * as THREE from 'three';
 import { AssetLoader } from "./webgl/AssetLoader";
 
 const assetLoader = new AssetLoader()
+assetLoader.addEventListener('loaded', (event) => {
+  const target = (event.currentTarget as AssetLoader);
+  console.log(`Loaded: ${target.loaded}/${target.total}`);
+})
+assetLoader.addEventListener('progress', (event) => {
+  const target = (event.currentTarget as AssetLoader);
+  console.log(`Loading... ${target.loaded}/${target.total}`);
+})
+
 const canvas = document.querySelector('.webgl')! as HTMLCanvasElement;
 const sceneManager = new SceneManager(canvas, assetLoader, window.innerWidth, window.innerHeight);
-sceneManager.render();
+sceneManager.loadAssets([SuzanaModel]);
 
-sceneManager.addDirectionLight(new THREE.Vector3(2, 2, 2), new THREE.Color(0xffffff), 3);
-sceneManager.addGltf(SuzanaModel);
+const directionalLight = new THREE.DirectionalLight(new THREE.Color(0xffffff), 3);
+directionalLight.position.set(2, 2, 2)
+sceneManager.scene.add(directionalLight);
+
+sceneManager.assetLoader.gltfLoader.load(SuzanaModel, gltf => {
+  const mesh = gltf.scene.children[0]
+  sceneManager.scene.add(mesh);
+  return mesh;
+});
