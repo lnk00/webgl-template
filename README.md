@@ -1,1 +1,1 @@
-# voyager
+# WebGL Template
