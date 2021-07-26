@@ -5,7 +5,7 @@ export class AssetLoader extends EventTarget {
   loadingManager: THREE.LoadingManager;
   gltfLoader: GLTFLoader;
   textureLoader: THREE.TextureLoader;
-  envTextureLoader: THREE.CubeTextureLoader;
+  cubeMapLoader: THREE.CubeTextureLoader;
 
   loaded = 0;
   total = 0;
@@ -29,6 +29,6 @@ export class AssetLoader extends EventTarget {
     );
     this.gltfLoader = new GLTFLoader(this.loadingManager);
     this.textureLoader = new THREE.TextureLoader(this.loadingManager);
-    this.envTextureLoader = new THREE.CubeTextureLoader(this.loadingManager);
+    this.cubeMapLoader = new THREE.CubeTextureLoader(this.loadingManager);
   }
 }

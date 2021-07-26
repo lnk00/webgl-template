@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { AssetLoader } from './AssetLoader';
 import { Pane } from 'tweakpane';
-import { Asset } from './AsssetManager';
+import { Asset, AssetType } from './AsssetManager';
 
 export class SceneManager {
   assetLoader: AssetLoader;
@@ -17,7 +17,7 @@ export class SceneManager {
 
   meshes: THREE.Mesh[] = [];
   textures: THREE.Texture[] = [];
-  envTextures: THREE.CubeTexture[] = [];
+  cubeMaps: THREE.CubeTexture[] = [];
 
   clock: THREE.Clock;
   elapsedTime: number;
@@ -37,10 +37,10 @@ export class SceneManager {
     this.clock = new THREE.Clock();
     this.elapsedTime = this.clock.getElapsedTime();
 
-    this.setupGui();
     this.setupScene();
     this.setupCamera();
     this.setupRenderer(canvas);
+    this.setupGui();
     this.setupControls();
     this.setupResize();
 
@@ -52,7 +52,7 @@ export class SceneManager {
   }
 
   setupCamera(): void {
-    this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(65, this.width / this.height, 0.1, 1000);
     this.camera.position.set(0, 0, 3);
   }
 
@@ -63,7 +63,7 @@ export class SceneManager {
     this.renderer.physicallyCorrectLights = true;
     this.renderer.outputEncoding = THREE.sRGBEncoding;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1;
+    this.renderer.toneMappingExposure = 2;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   }
@@ -75,6 +75,17 @@ export class SceneManager {
 
   setupGui(): void {
     this.gui = new Pane();
+    const rendererGuiFolder = this.gui.addFolder({ title: 'Renderer' });
+    rendererGuiFolder.addInput(this.renderer, 'toneMappingExposure', {
+      label: 'toneMapExpo',
+      min: 0,
+      max: 10,
+      step: 0.001,
+    });
+    const cameraFolder = this.gui.addFolder({ title: 'Camera' });
+    cameraFolder.addInput(this.camera, 'fov', { min: 55, max: 75, step: 1 }).on('change', () => {
+      this.camera.updateProjectionMatrix();
+    });
   }
 
   setupResize(): void {
@@ -91,7 +102,7 @@ export class SceneManager {
 
   loadAssets(assets: Asset[]): void {
     assets.forEach((asset) => {
-      if (asset.type === 'Mesh' && asset.url.endsWith('.gltf')) {
+      if (asset.type === AssetType.MESH && asset.url.endsWith('.gltf')) {
         this.assetLoader.gltfLoader.load(asset.url, (gltf) => {
           gltf.scene.children.forEach((child) => {
             if (child.type === 'Mesh') {
@@ -100,15 +111,15 @@ export class SceneManager {
             }
           });
         });
-      } else if (asset.type === 'Texture' && asset.url.endsWith('.png')) {
+      } else if (asset.type === AssetType.TEXTURE && asset.url.endsWith('.png')) {
         this.assetLoader.textureLoader.load(asset.url, (texture) => {
           texture.name = asset.name;
           this.textures.push(texture);
         });
-      } else if (asset.type === 'EnvMap') {
-        const envTexture = this.assetLoader.envTextureLoader.load(asset.urls!);
+      } else if (asset.type === AssetType.CUBEMAP && asset.urls) {
+        const envTexture = this.assetLoader.cubeMapLoader.load(asset.urls);
         envTexture.name = asset.name;
-        this.envTextures.push(envTexture);
+        this.cubeMaps.push(envTexture);
       }
     });
   }
@@ -129,8 +140,8 @@ export class SceneManager {
     return this.textures.find((texture) => texture.name === name);
   }
 
-  getEnvTextureByName(name: string): THREE.CubeTexture | undefined {
-    return this.envTextures.find((texture) => texture.name === name);
+  getCubeMapByName(name: string): THREE.CubeTexture | undefined {
+    return this.cubeMaps.find((texture) => texture.name === name);
   }
 
   render(): void {

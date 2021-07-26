@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { SceneManager } from './webgl/SceneManager';
 import { AssetLoader } from './webgl/AssetLoader';
 import { AssetsRepository } from './webgl/AsssetManager';
-import { gsap } from 'gsap';
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const canvas = document.querySelector('.webgl')! as HTMLCanvasElement;
@@ -17,39 +16,22 @@ function onLoading() {
 }
 
 function onLoaded() {
-  const pointLight = new THREE.PointLight('white', 3);
-  pointLight.position.set(2, 2, 2);
-  sceneManager.scene.add(pointLight);
+  const directionalLight = new THREE.DirectionalLight('#ffffff', 1);
+  directionalLight.position.set(2, 2, 2);
+  sceneManager.scene.add(directionalLight);
+  const guiLightFolder = sceneManager.gui.addFolder({ title: 'Light' });
+  guiLightFolder.addInput(directionalLight, 'intensity', { min: 0, max: 10, step: 0.001 });
+  guiLightFolder.addInput(directionalLight.position, 'x', { label: 'posX', min: -5, max: 5, step: 0.001 });
+  guiLightFolder.addInput(directionalLight.position, 'y', { label: 'posY', min: -5, max: 5, step: 0.001 });
+  guiLightFolder.addInput(directionalLight.position, 'z', { label: 'posZ', min: -5, max: 5, step: 0.001 });
 
   const cubeMesh = new THREE.Mesh(
     new THREE.BoxBufferGeometry(1, 1, 1),
     new THREE.MeshStandardMaterial({
-      map: sceneManager.getTextureByName('GoldAlbedo'),
-      roughnessMap: sceneManager.getTextureByName('GoldRoughness'),
-      metalnessMap: sceneManager.getTextureByName('GoldMetallic'),
-      aoMap: sceneManager.getTextureByName('GoldAO'),
-      normalMap: sceneManager.getTextureByName('GoldNormal'),
-      envMap: sceneManager.getEnvTextureByName('EnvMap'),
-      toneMapped: true,
-      envMapIntensity: 1,
-      metalness: 1,
-      roughness: 0.7,
-      aoMapIntensity: 0.75,
+      color: 'white',
+      envMap: sceneManager.getCubeMapByName('Cubemap'),
+      envMapIntensity: 5,
     })
   );
-  cubeMesh.geometry.setAttribute('uv2', new THREE.BufferAttribute(cubeMesh.geometry.attributes.uv.array, 2));
   sceneManager.scene.add(cubeMesh);
-
-  gsap.fromTo(sceneManager.camera.position, { z: 100 }, { z: 2, duration: 1, ease: 'power3.out' });
-
-  sceneManager.updateObjectCallback = () => {
-    cubeMesh.rotation.y = sceneManager.elapsedTime * 0.2;
-    cubeMesh.rotation.z = sceneManager.elapsedTime * 0.5;
-  };
-}
-
-const title = document.getElementById('title');
-const text = document.createTextNode('Voyager');
-if (title) {
-  title.appendChild(text);
 }

@@ -1,59 +1,35 @@
-import SuzanaModel from './../assets/suzana.gltf?url';
+import SuzanaModel from '../assets/models/suzana.gltf?url';
 
 export interface Asset {
   name: string;
-  type: string;
+  type: AssetType;
   url: string;
   urls?: string[];
+}
+
+export enum AssetType {
+  MESH,
+  TEXTURE,
+  CUBEMAP,
 }
 
 export const AssetsRepository: Asset[] = [
   {
     name: 'Suzanne',
-    type: 'Mesh',
+    type: AssetType.MESH,
     url: SuzanaModel,
   },
   {
-    name: 'GoldAlbedo',
-    type: 'Texture',
-    url: '/src/assets/gold/gold_albedo.png',
-  },
-  {
-    name: 'GoldAO',
-    type: 'Texture',
-    url: '/src/assets/gold/gold_ao.png',
-  },
-  {
-    name: 'GoldHeight',
-    type: 'Texture',
-    url: '/src/assets/gold/gold_height.png',
-  },
-  {
-    name: 'GoldMetallic',
-    type: 'Texture',
-    url: '/src/assets/gold/gold_metallic.png',
-  },
-  {
-    name: 'GoldNormal',
-    type: 'Texture',
-    url: '/src/assets/gold/gold_normal.png',
-  },
-  {
-    name: 'GoldRoughness',
-    type: 'Texture',
-    url: '/src/assets/gold/gold_roughness.png',
-  },
-  {
-    name: 'EnvMap',
-    type: 'EnvMap',
+    name: 'Cubemap',
+    type: AssetType.CUBEMAP,
     url: '',
     urls: [
-      '/src/assets/envMap/px.png',
-      '/src/assets/envMap/nx.png',
-      '/src/assets/envMap/py.png',
-      '/src/assets/envMap/ny.png',
-      '/src/assets/envMap/pz.png',
-      '/src/assets/envMap/nz.png',
+      'src/assets/cubemaps/basic/px.jpg',
+      'src/assets/cubemaps/basic/nx.jpg',
+      'src/assets/cubemaps/basic/py.jpg',
+      'src/assets/cubemaps/basic/ny.jpg',
+      'src/assets/cubemaps/basic/pz.jpg',
+      'src/assets/cubemaps/basic/nz.jpg',
     ],
   },
 ];
